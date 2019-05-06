@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package broute;
+
+// Empty Message Request Object Data contract
+message Empty {
+
+}
+
+// Message Response Object Data contract
+message Responsor {
+	string id = 1;
+	string timestamp = 2;
+	string headers = 3;
+	string payload = 4;
+}
+
+// Channel Service for comminication between client and server
+service Channel {
+	// Server Call connection
+	rpc ServerCall(stream Empty) returns (stream Responsor) {};
+}
