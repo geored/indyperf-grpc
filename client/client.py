@@ -1,37 +1,33 @@
 
 
 import grpc
-import msg_struct_pb2 as msg
+import msg_struct_pb2 as msg_
 import msg_struct_pb2_grpc as msg_grpc
-import json
-from google.protobuf import json_format
+import os
+import time
+import logging
+
+
+def gen():
+    for i in range(1,100):
+        time.sleep(1)
+        yield msg_.Empty()
 
 def run():
-    print("Establishing connection with server...")
-    channel = grpc.insecure_channel("localhost:50051",
-                                    options = (
-                                        ('grpc.keepalive_time_ms', 10000),
-                                        ('grpc.keepalive_timeout_ms', 5000),
-                                        ('grpc.keepalive_permit_without_calls', True),
-                                        ('grpc.http2.max_pings_without_data', 0),
-                                        ('grpc.http2.min_time_between_pings_ms',10000),
-                                        ('grpc.http2.min_ping_interval_without_data_ms', 5000),
-                                    )
-    )
-    # if pem is None:
-    #     return grpc.insecure_channel("localhost:50051", options)
-    # else:
-    #     creds = grpc.ssl_channel_credentials(pem)
-    #     return grpc.secure_channel(target, creds, options)
+    logging.warning("Establishing connection with server...")
 
-    stub = msg_grpc.ChannelStub(channel)
-    messages = stub.ServerCall(msg.Empty())
+    with open('server.crt', 'rb') as f:
+        trusted_certs = f.read()
+        credentials = grpc.ssl_channel_credentials(root_certificates=trusted_certs)
+        channel = grpc.secure_channel(os.getenv("GRPC_SERVER","[::]:50051"), credentials)
 
-    try:
-        for m in messages:
-            print("Server Response:\n%s" % json_format.MessageToJson(m) )
-    except KeyboardInterrupt:
-        exit(0)
+        stub = msg_grpc.ChannelStub(channel)
+        message = stub.ServerCall(msg_.Empty())
+        try:
+            logging.warning("Server Payload: {}".format(message))
+        except KeyboardInterrupt:
+            pass
+
 
 if __name__ == "__main__":
     run()

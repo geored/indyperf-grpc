@@ -1,7 +1,8 @@
-FROM python:3.7
+FROM python:3.6-slim
 
 WORKDIR /opt/broute
+ADD . .
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
-ADD brouteclient/ .
-CMD ["python","./client.py"]
+
+CMD ["python","client.py"]
