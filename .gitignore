@@ -113,8 +113,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-ssl
-.idea
+ssl/
+.idea/
 server/server.crt
 server/server.key
 client/server.crt
